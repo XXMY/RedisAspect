@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">
+
+<!--  	<appender name="file" class="org.apache.log4j.RollingFileAppender">
+		<param name="maxFileSize" value="2097152" />
+	</appender>
+	<logger name="com.cfw.service" additivity="false">
+		<priority value="INFO" />
+	</logger>
+	<root>
+		<priority value="ERROR" />
+		<appender-ref ref="file" />
+	</root> -->
+
+	<appender name="console" class="org.apache.log4j.ConsoleAppender">
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%d [%t] %-5p %c - %m%n" />
+		</layout>
+	</appender>
+
+	
+	<logger name="com.mchange" additivity="false">
+		<level value="warn" />
+		<appender-ref ref="console" />
+	</logger>
+
+	<logger name="org.springframework" additivity="false">
+		<level value="warn" />
+		<appender-ref ref="console" />
+	</logger>
+
+	<logger name="org.springframework.web" additivity="false">
+		<level value="warn" />
+		<appender-ref ref="console" />
+	</logger>
+
+	<logger name="org.apache.struts2" additivity="false">
+		<level value="debug" />
+		<appender-ref ref="console" />
+	</logger>
+
+	<!-- 下面是打印mybatis语句的配置      start-->
+	<logger name="cfw.movies.mapper" additivity="true">
+		<level value="DEBUG" />
+	</logger>
+	<logger name="java.sql" additivity="true">
+		<level value="debug" />
+		<appender-ref ref="console" />
+	</logger>
+	<logger name="java.sql.Connection" additivity="true">
+		<level value="DEBUG" />
+	</logger>
+	<logger name="java.sql.Statement" additivity="true">
+		<level value="DEBUG" />
+	</logger>
+	<logger name="java.sql.PreparedStatement" additivity="true">
+		<level value="DEBUG" />
+	</logger>
+	<logger name="java.sql.ResultSet" additivity="true">
+		<level value="DEBUG" />
+	</logger>
+	<!-- end -->
+	<root>
+		<level value="info" />
+		<appender-ref ref="console" />
+	</root>
+</log4j:configuration>

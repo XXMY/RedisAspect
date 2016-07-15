@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/aop
+        http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+	<!-- 使用注解的包，包括子集 -->    
+	<context:component-scan base-package="cfw,test"></context:component-scan>
+
+	<!-- 该 BeanPostProcessor 将自动对标注 @Autowired 的 Bean 进行注入 -->
+	<bean class="org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor"></bean>
+
+
+	<!-- 启用切面注解 -->
+	<aop:aspectj-autoproxy proxy-target-class="true"/>
+
+	<!-- 手动配置切面 -->
+	<!-- Redis 缓存切面 -->
+	<!--<bean id="redisCacheAspect" class="cfw.redis.aspect.RedisCacheAspect">
+		<property name="myJedis" ref="myJedis"></property>
+	</bean>-->
+</beans>

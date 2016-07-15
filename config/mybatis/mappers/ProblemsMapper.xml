@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- namespace 指定的是映射接口的完整路劲名 -->
+<mapper namespace="cfw.movies.mapper.ProblemsMapper">
+	<!-- Insert a problem must with its full information. -->
+	<insert id="insertOne" parameterType="Problems">
+		INSERT INTO 
+			problems(
+				user_id,
+				title,
+				content,
+				added_time,
+				modified_time
+			) 
+		VALUES(
+			#{user_id},
+			#{title},
+			#{content},
+			NOW(),
+			NOW()
+		)
+	</insert>
+	<!-- 2015.08.06 17:13 -->
+	<delete id="deleteOne" parameterType="Problems">
+		DELETE FROM 
+			problems
+		<where>
+			<if test="id!=null">
+				id = #{id}
+			</if>
+			<if test="user_id!=null">
+				AND user_id = #{user_id}
+			</if>
+			<if test="title!=null and title!=''">
+				AND title like = %#{title}%
+			</if>
+		</where>
+	</delete>
+	<!-- 2015.08.06 17:17 -->
+	<update id="updateOne" parameterType="Problems">
+		UPDATE 
+			problems
+		<set>
+			<if test="title!=null and title!=''">
+				title = #{title},
+			</if>
+			<if test="content!=null">
+				content = #{content},
+			</if>
+			modified_time = NOW()
+		</set>
+		<where>
+			id = 1
+		</where>
+	</update>
+	
+	<select id="findOne" parameterType="Problems" resultType="Problems">
+		SELECT 
+			p.id,
+			p.user_id,
+			p.title,
+			p.content,
+			p.added_time,
+			p.modified_time,
+			u.name
+		FROM
+			problems p,
+			user u
+		<where>
+			u.id = p.user_id
+			<!-- <if test="title!=null and title!=''">
+				AND p.title like '%#{title}%'
+			</if> -->
+			<!-- <if test="content!=null and content!=''">
+				AND p.content like %#{content}%
+			</if> -->
+		</where>
+	</select>
+</mapper>

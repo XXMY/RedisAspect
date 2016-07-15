@@ -253,10 +253,8 @@ public class MyJedis {
 					Map<String,String> hashData = this.getHashData(propertyRedisKey,null);
 					Field sonPropertyField = returnClass.getDeclaredField(name);
 					String sonPropertyClassTypeName = sonPropertyField.getType().getName();
-
 					// Recursive.
 					entryValueObejct = this.convertHashToRealType(sonPropertyClassTypeName,hashData);
-
 				}
 				// Perform the assignment for this property
 				beanUtilsBean.setProperty(returnObject, name, entryValueObejct);

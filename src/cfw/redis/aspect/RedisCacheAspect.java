@@ -52,8 +52,7 @@ public class RedisCacheAspect {
 		Object [] args = pjp.getArgs();
 		
 		Map<String,Object> map = this.getAnnotationProperties(method, args);
-		
-		
+
 		Object value = null;
 		value = this.myJedis.getRedisValue(method, map);
 		

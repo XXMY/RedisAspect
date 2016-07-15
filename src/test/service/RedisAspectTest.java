@@ -18,10 +18,16 @@ public class RedisAspectTest {
         moviesDao = (MoviesDao)SpringUtil.getBean("moviesDao");
     }
 
-    @Test
+    //@Test
     public void testGetMovieById(){
-
         Movies movie = moviesDao.getMovieById(10L);
         System.out.println(movie);
+    }
+
+    @Test
+    public void testGetMovieName(){
+        String name = moviesDao.getMovieName(10L,"name");
+
+        System.out.println(name);
     }
 }

@@ -11,6 +11,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 
 /**
@@ -221,6 +222,17 @@ public class MyJedis {
 
 		if(StringUtils.isEmpty(returnTypeName) || result == null) return null;
 
+		if(returnTypeName.equalsIgnoreCase("java.lang.String")){
+			Set<String> resultKeys = result.keySet();
+			String value = "";
+			for(String resultKey : resultKeys){
+				value = result.get(resultKey);
+			}
+
+			return value;
+
+		}
+
 		Class returnClass = null;
 		Object returnObject = null;
 		try {
@@ -247,17 +259,18 @@ public class MyJedis {
 				}
 
 				String entryValue = (String)entry.getValue();
-				Object entryValueObejct = entryValue;
+				Object entryObject = entryValue;
 				if(entryValue.startsWith("REDIS_HASH_KEY.")){
+					// Define a field's value start with 'REDIS_HASH_KEY.' is a nested java bean.
 					String propertyRedisKey = entryValue.split("REDIS_HASH_KEY.")[1];
 					Map<String,String> hashData = this.getHashData(propertyRedisKey,null);
 					Field sonPropertyField = returnClass.getDeclaredField(name);
 					String sonPropertyClassTypeName = sonPropertyField.getType().getName();
 					// Recursive.
-					entryValueObejct = this.convertHashToRealType(sonPropertyClassTypeName,hashData);
+					entryObject = this.convertHashToRealType(sonPropertyClassTypeName,hashData);
 				}
 				// Perform the assignment for this property
-				beanUtilsBean.setProperty(returnObject, name, entryValueObejct);
+				beanUtilsBean.setProperty(returnObject, name, entryObject);
 
 			}
 		}catch(Exception e){

@@ -1,6 +1,7 @@
 package cfw.redis;
 
 import cfw.redis.annotation.RedisCacheable;
+import cfw.reflect.ReflectConsts;
 import cfw.reflect.SimpleAssign;
 import org.apache.commons.beanutils.BeanUtilsBean;
 import org.apache.commons.lang.StringUtils;
@@ -23,7 +24,9 @@ import java.util.Set;
 public class MyJedis {
 	
 	private Jedis jedis;
-	
+
+	private final static String Redis_Hash_Prefix = "REDIS_HASH_Prefix.";
+
 	public MyJedis(JedisPool jedisPool){
 		super();
 		if(jedisPool != null){
@@ -70,17 +73,16 @@ public class MyJedis {
 					result = this.jedis.hget(key, field);*/
 					String [] fields = (String []) redisPropertyMap.get("fields");
 					Map<String,String> hashValue = this.getHashData(key,fields);
-					result = this.convertHashToRealType(method.getReturnType().getName(),hashValue);
+					if(hashValue != null && !hashValue.isEmpty()){
+						result = this.convertHashToRealType(method.getReturnType().getName(),hashValue);
+					}
 					break;
 				default:
 					break;
 			}
 		}
 
-		String returnTypeName = method.getGenericReturnType().toString();
-
 		if(result == null) return null;
-		//Object value = this.convertToRealType(returnTypeName, result);
 
 		return result;
 	}
@@ -95,7 +97,9 @@ public class MyJedis {
 	public boolean saveRedisValue(Map<String,Object> redisPropertyMap,Object value){
 		String key = (String)redisPropertyMap.get("key");
 
-		if(StringUtils.isNotEmpty(key)) {
+		if(StringUtils.isEmpty(key)) return false;
+
+		try{
 			RedisCacheable.KeyType keyType = (RedisCacheable.KeyType) redisPropertyMap.get("keyType");
 			switch (keyType){
 				case STRING:
@@ -111,35 +115,53 @@ public class MyJedis {
 				default:
 					break;
 			}
+		}catch(Exception e){
+			e.printStackTrace();
+			return false;
 		}
 
 		return true;
 	}
 
 	/**
+	 * While save data into redis with hash, result object must be a java bean,<br>
+	 * and this method will save all properties if property's value is not null.<p></p>
+	 * If result object contains a bean, call this method in recursion to save it.
 	 * @author Fangwei_Cai
 	 * @create 2016年7月11日14:44:32
 	 * @param key
-	 * @param value
+	 * @param result
      * @return
      */
-	public boolean saveHashData(String key,Object value){
+	public boolean saveHashData(String key, Object result){
 
-		Class clazz = value.getClass();
-		Field[] fields = SimpleAssign.getFields(null,clazz);
-		for(Field field : fields){
-			try {
-				Object result = field.get(value);
-				String hashField = field.getName();
-				if(result!=null)
-					this.jedis.hset(key,hashField,result.toString());
-			} catch (IllegalAccessException e) {
-				e.printStackTrace();
-				return false;
+		if(result == null || StringUtils.isEmpty(key)) return false;
+
+		Class clazz = result.getClass();
+		Field[] resultClassFields = SimpleAssign.getFields(null,clazz);
+		try{
+			for(Field resultClassField : resultClassFields){
+				Object value = resultClassField.get(result);
+				String valueFieldName = resultClassField.getName();
+				String valueFieldTypeName = resultClassField.getType().getSimpleName();
+				if(value == null ) continue;
+
+				if(ReflectConsts.generalIdentifierSimpleNamesContains(valueFieldTypeName)){
+					// General type value
+					this.jedis.hset(key,valueFieldName,value.toString());
+				}else{
+					// Nested java bean.
+					boolean saveResult = this.saveHashData(key+":"+valueFieldName,value);
+					if(saveResult) this.jedis.hset(key,valueFieldName,Redis_Hash_Prefix+key+":"+valueFieldName);
+				}
+
 			}
+		}catch(IllegalAccessException e){
+			e.printStackTrace();
+			return false;
 		}
 
-		return false;
+		return true;
 	}
 
 	/**
@@ -260,9 +282,9 @@ public class MyJedis {
 
 				String entryValue = (String)entry.getValue();
 				Object entryObject = entryValue;
-				if(entryValue.startsWith("REDIS_HASH_KEY.")){
+				if(entryValue.startsWith(Redis_Hash_Prefix)){
 					// Define a field's value start with 'REDIS_HASH_KEY.' is a nested java bean.
-					String propertyRedisKey = entryValue.split("REDIS_HASH_KEY.")[1];
+					String propertyRedisKey = entryValue.split(Redis_Hash_Prefix)[1];
 					Map<String,String> hashData = this.getHashData(propertyRedisKey,null);
 					Field sonPropertyField = returnClass.getDeclaredField(name);
 					String sonPropertyClassTypeName = sonPropertyField.getType().getName();

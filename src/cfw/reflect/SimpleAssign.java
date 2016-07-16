@@ -11,16 +11,7 @@ import java.util.Map;
  * @time since Dec 4, 2015 3:09:53 PM
  */
 public class SimpleAssign {
-	// Seems useless.
-	private static final String [] setterIdentifierNames = {
-			"Short","int","Integer","Long",
-			"String","Boolean","Date","Double",
-			"float","Float","double"
-		};
-	// Get method identifier.
-	private static final String [] isIdentifierNames = {"Boolean"};
-	
-	
+
 	/**
 	 * <b>Main method to assign</b>.<p>
 	 * Attempting to use this method, something should keep in mind is that:<br>
@@ -131,12 +122,9 @@ public class SimpleAssign {
 	 */
 	@Deprecated
 	private static boolean setterIdentiferHas(String simpleIdentiferName){
-		for(String identiferName : setterIdentifierNames){
-			if(simpleIdentiferName.equalsIgnoreCase(identiferName))
-				return true;
-		}
-		
-		return false;
+
+		return ReflectConsts.generalIdentifierSimpleNamesContains(simpleIdentiferName);
+
 	}
 
 	/**
@@ -146,12 +134,7 @@ public class SimpleAssign {
 	 * @return
      */
 	private static boolean isIdentifierHas(String isIdentifierName){
-		for(String identifierName : isIdentifierNames){
-			if(identifierName.equalsIgnoreCase(isIdentifierName))
-				return true;
-		}
-
-		return false;
+		return ReflectConsts.isIdentifierSimpleNamesContains(isIdentifierName);
 	}
 
 	/**

@@ -26,8 +26,11 @@ public class RedisAspectTest {
 
     @Test
     public void testGetMovieName(){
-        String name = moviesDao.getMovieName(10L,"name");
+        /*Movies movie = moviesDao.getMovieName(10L,"name");
+        System.out.println(movie);*/
 
-        System.out.println(name);
+        String movieName = moviesDao.getMovieName(10L);
+        System.out.println(movieName);
     }
+
 }

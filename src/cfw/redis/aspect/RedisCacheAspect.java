@@ -1,8 +1,7 @@
 package cfw.redis.aspect;
 
-import cfw.redis.MyJedis;
+import cfw.redis.CJedis;
 import cfw.redis.annotation.*;
-import com.mchange.lang.StringUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -27,15 +26,15 @@ public class RedisCacheAspect {
 
 	private final String cache = "@annotation(cfw.redis.annotation.RedisCacheable)";
 	
-	@Resource(name="myJedis")
-	private MyJedis myJedis;
+	@Resource(name="cJedis")
+	private CJedis cJedis;
 
-	public MyJedis getMyJedis() {
-		return myJedis;
+	public CJedis getMyJedis() {
+		return cJedis;
 	}
 
-	public void setMyJedis(MyJedis myJedis) {
-		this.myJedis = myJedis;
+	public void setMyJedis(CJedis myJedis) {
+		this.cJedis = cJedis;
 	}
 
 	/**
@@ -54,12 +53,12 @@ public class RedisCacheAspect {
 		Map<String,Object> map = this.getAnnotationProperties(method, args);
 
 		Object value = null;
-		value = this.myJedis.getRedisValue(method, map);
+		value = this.cJedis.getRedisValue(method, map);
 		
 		if(value == null){
 			value = pjp.proceed();
 			if(value != null){
-				this.myJedis.saveRedisValue(map,value);
+				this.cJedis.saveRedisValue(map,value);
 			}
 		}
 		
@@ -104,6 +103,8 @@ public class RedisCacheAspect {
 			if(fields.size()>0) map.put("fields",fields.toArray(new String[]{}));
 			map.put("key", buffer.toString());
 			map.put("keyType", redisCacheable.keyType());
+			map.put("direction",redisCacheable.direction());
+			map.put("listOrder",redisCacheable.listOrder());
 		}
 		
 		return map;

@@ -24,5 +24,19 @@ public @interface RedisCacheable {
 	String key() default "";
 	
 	KeyType keyType() default KeyType.STRING;
+
+	public enum Direction {
+		RIGHT,LEFT
+	}
+
+	Direction direction() default Direction.LEFT;
+
+	public enum ListOrder {
+		INDEX,INSERT,LEN,POP,PUSH,RANGE,REM,SET,TRIM
+	}
+
+	ListOrder listOrder() default ListOrder.RANGE;
+
+
 	
 }

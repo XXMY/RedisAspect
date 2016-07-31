@@ -2,10 +2,11 @@ package test.dao;
 
 import cfw.model.Descriptions;
 import cfw.model.Movies;
-import cfw.redis.annotation.RedisCacheable;
-import cfw.redis.annotation.RedisField;
-import cfw.redis.annotation.RedisID;
+import cfw.redis.annotation.*;
 import org.springframework.stereotype.Repository;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by Duskrain on 2016/7/14.
@@ -42,5 +43,24 @@ public class MoviesDao {
     @RedisCacheable(key = "movie:name")
     public String getMovieName(@RedisID  Long mid){
         return "YE WEN";
+    }
+
+    @RedisCacheable(key = "movie:10:descriptions",
+            keyType = RedisCacheable.KeyType.LIST,
+            direction = RedisCacheable.Direction.LEFT,
+            listOrder = RedisCacheable.ListOrder.RANGE)
+    public List<Descriptions> getDescriptions(@RedisStart Long start, @RedisEnd Long end){
+        List<Descriptions> descriptions = new ArrayList<>();
+        for(int i=0;i<15;i++){
+            Descriptions description = new Descriptions();
+            description.setId((long)i);
+            description.setAbstract_("习近平组织中央深改组会议-" + i);
+            description.setDescription("习近平主持召开中央全面深化改革领导小组第二十六次会议-" + i);
+            description.setIsdeleted(true);
+
+            descriptions.add(description);
+        }
+
+        return descriptions;
     }
 }

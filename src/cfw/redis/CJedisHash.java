@@ -72,7 +72,7 @@ class CJedisHash {
      * @param result
      * @return
      */
-    public boolean saveHashData(String key, Object result){
+    public boolean saveHashData(String key, Object result, int expireTime){
 
         if(result == null || StringUtils.isEmpty(key)) return false;
 
@@ -90,11 +90,11 @@ class CJedisHash {
                     this.jedis.hset(key,valueFieldName,value.toString());
                 }else{
                     // Nested java bean.
-                    boolean saveResult = this.saveHashData(key+":"+valueFieldName,value);
+                    boolean saveResult = this.saveHashData(key+":"+valueFieldName,value,expireTime);
                     if(saveResult) this.jedis.hset(key,valueFieldName,Redis_Hash_Prefix+key+":"+valueFieldName);
                 }
-
             }
+            this.jedis.expire(key,expireTime);
         }catch(IllegalAccessException e){
             e.printStackTrace();
             return false;

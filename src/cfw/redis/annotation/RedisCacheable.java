@@ -1,5 +1,9 @@
 package cfw.redis.annotation;
 
+import cfw.redis.util.Direction;
+import cfw.redis.util.KeyType;
+import cfw.redis.util.ListOrder;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -13,30 +17,14 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface RedisCacheable {
 	
-	public enum KeyType {
-		STRING,
-		LIST,
-		SET,
-		ZSET,
-		HASH
-	}
-	
 	String key() default "";
 	
 	KeyType keyType() default KeyType.STRING;
 
-	public enum Direction {
-		RIGHT,LEFT
-	}
-
 	Direction direction() default Direction.LEFT;
-
-	public enum ListOrder {
-		INDEX,INSERT,LEN,POP,PUSH,RANGE,REM,SET,TRIM
-	}
 
 	ListOrder listOrder() default ListOrder.RANGE;
 
-
+	int expire() default 0;
 	
 }

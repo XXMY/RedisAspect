@@ -1,19 +1,15 @@
 package cfw.redis;
 
 import cfw.redis.annotation.RedisCacheable;
-import cfw.reflect.ReflectConsts;
-import cfw.reflect.SimpleAssign;
-import org.apache.commons.beanutils.BeanUtilsBean;
+import cfw.redis.util.KeyType;
+import cfw.redis.util.ListOrder;
 import org.apache.commons.lang.StringUtils;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 
 /**
@@ -53,7 +49,7 @@ public class CJedis {
 		Object result = null;
 
 		if(StringUtils.isNotEmpty(key)){
-			RedisCacheable.KeyType keyType = (RedisCacheable.KeyType)redisPropertyMap.get("keyType");
+			KeyType keyType = (KeyType)redisPropertyMap.get("keyType");
 			switch(keyType){
 				case STRING:
 					result = this.jedis.get(key);
@@ -86,24 +82,25 @@ public class CJedis {
      */
 	public boolean saveRedisValue(Map<String,Object> redisPropertyMap,Object value){
 		String key = (String)redisPropertyMap.get("key");
+        int expireTime = (Integer) redisPropertyMap.get("expire");
 
 		if(StringUtils.isEmpty(key)) return false;
 
 		try{
-			RedisCacheable.KeyType keyType = (RedisCacheable.KeyType) redisPropertyMap.get("keyType");
+			KeyType keyType = (KeyType) redisPropertyMap.get("keyType");
 			switch (keyType){
 				case STRING:
 					this.jedis.set((String)redisPropertyMap.get("key"), value.toString());
 					break;
 				case LIST:
                     redisPropertyMap.remove("listOrder");
-                    redisPropertyMap.put("listOrder", RedisCacheable.ListOrder.PUSH);
+                    redisPropertyMap.put("listOrder", ListOrder.PUSH);
                     this.cJedisList.process(null,redisPropertyMap,key,(List)value);
 					break;
 				case SET:
 					break;
 				case HASH:
-					this.cJedisHash.saveHashData(key,value);
+					this.cJedisHash.saveHashData(key,value,expireTime);
 					break;
 				default:
 					break;
@@ -112,6 +109,9 @@ public class CJedis {
 			e.printStackTrace();
 			return false;
 		}
+
+		// Set keys expire time.
+		if(expireTime > 0) this.jedis.expire(key,expireTime);
 
 		return true;
 	}

@@ -3,6 +3,9 @@ package test.dao;
 import cfw.model.Descriptions;
 import cfw.model.Movies;
 import cfw.redis.annotation.*;
+import cfw.redis.util.Direction;
+import cfw.redis.util.KeyType;
+import cfw.redis.util.ListOrder;
 import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
@@ -14,7 +17,7 @@ import java.util.List;
 @Repository
 public class MoviesDao {
 
-    @RedisCacheable(key = "movie",keyType = RedisCacheable.KeyType.HASH)
+    @RedisCacheable(key = "movie",keyType = KeyType.HASH, expire = 10)
     public Movies getMovieById(@RedisID Long mid){
         Movies movie = new Movies();
         movie.setId(mid);
@@ -31,7 +34,7 @@ public class MoviesDao {
         return movie;
     }
 
-    @RedisCacheable(key = "movie", keyType = RedisCacheable.KeyType.HASH)
+    @RedisCacheable(key = "movie", keyType = KeyType.HASH)
     public Movies getMovieName(@RedisID Long mid,@RedisField String field){
         Movies movie = new Movies();
         movie.setName("叶问3");
@@ -46,9 +49,10 @@ public class MoviesDao {
     }
 
     @RedisCacheable(key = "movie:10:descriptions",
-            keyType = RedisCacheable.KeyType.LIST,
-            direction = RedisCacheable.Direction.LEFT,
-            listOrder = RedisCacheable.ListOrder.RANGE)
+            keyType = KeyType.LIST,
+            direction = Direction.LEFT,
+            listOrder = ListOrder.RANGE,
+            expire = 10)
     public List<Descriptions> getDescriptions(@RedisStart Long start, @RedisEnd Long end){
         List<Descriptions> descriptions = new ArrayList<>();
         for(int i=0;i<15;i++){

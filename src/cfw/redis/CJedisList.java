@@ -1,6 +1,8 @@
 package cfw.redis;
 
 import cfw.redis.annotation.RedisCacheable;
+import cfw.redis.util.Direction;
+import cfw.redis.util.ListOrder;
 import cfw.reflect.ReflectUtils;
 import com.google.gson.Gson;
 import org.springframework.util.StringUtils;
@@ -33,8 +35,8 @@ class CJedisList {
      */
     public Object process(Method method, Map<String,Object> redisPropertyMap,String key,List<?> values){
         Object result = null;
-        RedisCacheable.ListOrder order = (RedisCacheable.ListOrder) redisPropertyMap.get("listOrder");
-        RedisCacheable.Direction direction = (RedisCacheable.Direction) redisPropertyMap.get("direction");
+        ListOrder order = (ListOrder) redisPropertyMap.get("listOrder");
+        Direction direction = (Direction) redisPropertyMap.get("direction");
 
         if(order == null || direction == null) return result;
 
@@ -64,11 +66,7 @@ class CJedisList {
                 Long start = (Long) redisPropertyMap.get("start");
                 Long end = (Long) redisPropertyMap.get("end");
                 if(start == null) start = 0L;
-                if(end == null){
-                    end = -1L;
-                }else {
-                    end = start + end;
-                }
+                if(end == null) end = -1L;
 
                 result = this.range(key,start,end,genericTypeClass);
 
@@ -92,7 +90,7 @@ class CJedisList {
      * @param direction
      * @return
      */
-    private Long push(String key,List<?> values, RedisCacheable.Direction direction){
+    private Long push(String key,List<?> values, Direction direction){
         Long pushResult = 0L;
 
         if(StringUtils.isEmpty(key) || values == null || values.size() == 0) return pushResult;
@@ -103,7 +101,7 @@ class CJedisList {
             valueArray[i] = gson.toJson(values.get(i));
         }
 
-        if(direction == null) direction = RedisCacheable.Direction.LEFT;
+        if(direction == null) direction = Direction.LEFT;
         switch(direction){
             case LEFT:
                 pushResult = this.jedis.lpush(key,valueArray);
@@ -138,7 +136,7 @@ class CJedisList {
             return null;
         }
 
-        if(jedisResult == null || jedisResult.size() == 0) return returnResult;
+        if(jedisResult == null) return returnResult;
 
         Gson gson = new Gson();
         returnResult = new ArrayList<>();

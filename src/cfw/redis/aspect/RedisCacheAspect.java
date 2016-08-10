@@ -105,6 +105,7 @@ public class RedisCacheAspect {
 			map.put("keyType", redisCacheable.keyType());
 			map.put("direction",redisCacheable.direction());
 			map.put("listOrder",redisCacheable.listOrder());
+			map.put("expire",redisCacheable.expire());
 		}
 		
 		return map;

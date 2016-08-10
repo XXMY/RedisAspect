@@ -64,7 +64,11 @@ class CJedisList {
                 Long start = (Long) redisPropertyMap.get("start");
                 Long end = (Long) redisPropertyMap.get("end");
                 if(start == null) start = 0L;
-                if(end == null) end = -1L;
+                if(end == null){
+                    end = -1L;
+                }else {
+                    end = start + end;
+                }
 
                 result = this.range(key,start,end,genericTypeClass);
 
@@ -134,7 +138,7 @@ class CJedisList {
             return null;
         }
 
-        if(jedisResult == null) return returnResult;
+        if(jedisResult == null || jedisResult.size() == 0) return returnResult;
 
         Gson gson = new Gson();
         returnResult = new ArrayList<>();

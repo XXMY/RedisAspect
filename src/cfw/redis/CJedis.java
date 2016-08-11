@@ -1,6 +1,5 @@
 package cfw.redis;
 
-import cfw.redis.annotation.RedisCacheable;
 import cfw.redis.util.KeyType;
 import cfw.redis.util.ListOrder;
 import org.apache.commons.lang.StringUtils;

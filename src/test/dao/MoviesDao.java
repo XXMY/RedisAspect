@@ -17,7 +17,7 @@ import java.util.List;
 @Repository
 public class MoviesDao {
 
-    @RedisCacheable(key = "movie",keyType = KeyType.HASH, expire = 10)
+    @RedisCacheable(key = "movie",keyType = KeyType.HASH)
     public Movies getMovieById(@RedisID Long mid){
         Movies movie = new Movies();
         movie.setId(mid);

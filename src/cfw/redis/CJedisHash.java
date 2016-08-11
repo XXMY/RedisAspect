@@ -94,7 +94,10 @@ class CJedisHash {
                     if(saveResult) this.jedis.hset(key,valueFieldName,Redis_Hash_Prefix+key+":"+valueFieldName);
                 }
             }
-            this.jedis.expire(key,expireTime);
+
+            if(expireTime > 0) {
+                this.jedis.expire(key,expireTime);
+            }
         }catch(IllegalAccessException e){
             e.printStackTrace();
             return false;

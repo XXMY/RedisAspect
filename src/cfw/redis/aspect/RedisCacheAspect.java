@@ -2,11 +2,13 @@ package cfw.redis.aspect;
 
 import cfw.redis.CJedis;
 import cfw.redis.annotation.*;
+import cfw.redis.exception.CRedisInitializeException;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.stereotype.Component;
+import redis.clients.jedis.JedisPool;
 
 import javax.annotation.Resource;
 import java.lang.annotation.Annotation;
@@ -25,17 +27,9 @@ public class RedisCacheAspect {
 
 
 	private final String cache = "@annotation(cfw.redis.annotation.RedisCacheable)";
-	
-	@Resource(name="cJedis")
-	private CJedis cJedis;
 
-	public CJedis getMyJedis() {
-		return cJedis;
-	}
-
-	public void setMyJedis(CJedis myJedis) {
-		this.cJedis = cJedis;
-	}
+	@Resource(name = "jedisPool")
+	private JedisPool jedisPool;
 
 	/**
 	 * @author Fangwei_Cai
@@ -46,23 +40,31 @@ public class RedisCacheAspect {
 	 */
 	@Around(value = cache)
 	public Object process(ProceedingJoinPoint pjp) throws Throwable{
-		
-		Method method = ((MethodSignature) pjp.getSignature()).getMethod();
-		Object [] args = pjp.getArgs();
-		
-		Map<String,Object> map = this.getAnnotationProperties(method, args);
+		CJedis cJedis = this.initCJedis();
+		try{
+			Method method = ((MethodSignature) pjp.getSignature()).getMethod();
+			Object [] args = pjp.getArgs();
 
-		Object value = null;
-		value = this.cJedis.getRedisValue(method, map);
-		
-		if(value == null){
-			value = pjp.proceed();
-			if(value != null){
-				this.cJedis.saveRedisValue(map,value);
+			Map<String,Object> map = this.getAnnotationProperties(method, args);
+
+			Object value = null;
+			value = cJedis.getRedisValue(method, map);
+
+			if(value == null){
+				value = pjp.proceed();
+				if(value != null){
+					cJedis.saveRedisValue(map,value);
+				}
 			}
+
+			return value;
+		}catch(Exception e){
+			e.printStackTrace();
+		}finally{
+			this.releaseCJedis(cJedis);
 		}
-		
-		return value;
+
+		return null;
 	}
 	
 	/**
@@ -111,5 +113,20 @@ public class RedisCacheAspect {
 		return map;
 	}
 
+	private CJedis initCJedis() throws CRedisInitializeException {
+		if(this.jedisPool != null){
+			CJedis cJedis = new CJedis(this.jedisPool);
+
+			return cJedis;
+		}
+
+		return null;
+	}
+
+	private void releaseCJedis(CJedis cJedis){
+		if(cJedis != null){
+			cJedis.close(this.jedisPool);
+		}
+	}
 	
 }

@@ -5,6 +5,7 @@ import cfw.reflect.SimpleAssign;
 import org.apache.commons.beanutils.BeanUtilsBean;
 import org.apache.commons.lang.StringUtils;
 import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -15,16 +16,15 @@ import java.util.Set;
 /**
  * Created by Cfw on 2016/7/23.
  */
-class CJedisHash {
-
-    private Jedis jedis;
+class CJedisHash extends BaseJedis{
 
     private final static String Redis_Hash_Prefix = "REDIS_HASH_Prefix.";
 
-    public CJedisHash(Jedis jedis){
-        this.jedis = jedis;
+    public CJedisHash(JedisPool jedisPool){
+        if(jedisPool != null){
+            this.jedis = jedisPool.getResource();
+        }
     }
-
 
     public Object getValue(Method method,Map<String,Object> redisPropertyMap,String key){
         Object result = null;

@@ -1,12 +1,12 @@
 package cfw.redis;
 
-import cfw.redis.annotation.RedisCacheable;
 import cfw.redis.util.Direction;
 import cfw.redis.util.ListOrder;
 import cfw.reflect.ReflectUtils;
 import com.google.gson.Gson;
 import org.springframework.util.StringUtils;
 import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -16,13 +16,12 @@ import java.util.Map;
 /**
  * Created by Cfw on 2016/7/23.
  */
-class CJedisList {
+class CJedisList extends BaseJedis{
 
-    private Jedis jedis;
-
-    public CJedisList(Jedis jedis){
-        if(jedis != null)
-            this.jedis = jedis;
+    public CJedisList(JedisPool jedisPool){
+        if(jedisPool != null){
+            this.jedis = jedisPool.getResource();
+        }
     }
 
     /**

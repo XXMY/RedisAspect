@@ -1,14 +1,17 @@
 package cfw.redis;
 
+import cfw.redis.exception.CRedisInitializeException;
 import cfw.redis.util.KeyType;
 import cfw.redis.util.ListOrder;
 import org.apache.commons.lang.StringUtils;
-import redis.clients.jedis.Jedis;
+
 import redis.clients.jedis.JedisPool;
 
 import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 
 /**
@@ -17,22 +20,35 @@ import java.util.Map;
  * @author Fangwei_Cai
  * @time since 2016年6月23日 下午6:15:39
  */
-public class CJedis {
-	
-	private Jedis jedis;
+public class CJedis extends BaseJedis{
 
-	private CJedisHash cJedisHash;
+    private Map<String,BaseJedis> cJedisImpls = new HashMap<>();
 
-    private CJedisList cJedisList;
-
-	public CJedis(JedisPool jedisPool){
+	public CJedis(JedisPool jedisPool) throws CRedisInitializeException {
 		super();
 		if(jedisPool != null){
-			this.jedis = jedisPool.getResource();
-			this.cJedisHash = new CJedisHash(this.jedis);
-            this.cJedisList = new CJedisList(this.jedis);
+            this.initialize(jedisPool);
+            this.cJedisImpls.put("hash",new CJedisHash(jedisPool));
+            this.cJedisImpls.put("list",new CJedisList(jedisPool));
 		}
 	}
+
+    /**
+     * Empty CJedis, set jedis to null.
+     * @author Fangwei_Cai
+     * @time since 2016-8-14 08:55:11
+     * @return
+     */
+    public boolean close(JedisPool jedisPool){
+        if(jedisPool != null){
+            this.release(jedisPool);
+        }
+        Set<String> keys = this.cJedisImpls.keySet();
+        for(String key : keys){
+            this.cJedisImpls.get(key).release(jedisPool);
+        }
+        return true;
+    }
 
 	/**
 	 * @author Fangwei_Cai
@@ -54,13 +70,15 @@ public class CJedis {
 					result = this.jedis.get(key);
 					break;
 				case LIST:
-					result = this.cJedisList.process(method,redisPropertyMap,key,null);
+                    CJedisList cJedisList = (CJedisList)this.cJedisImpls.get("list");
+					result = cJedisList.process(method,redisPropertyMap,key,null);
 					break;
 				case SET:
 
 					break;
 				case HASH:
-					result = this.cJedisHash.getValue(method,redisPropertyMap,key);
+                    CJedisHash cJedisHash = (CJedisHash) this.cJedisImpls.get("hash");
+					result = cJedisHash.getValue(method,redisPropertyMap,key);
 					break;
 				default:
 					break;
@@ -94,12 +112,14 @@ public class CJedis {
 				case LIST:
                     redisPropertyMap.remove("listOrder");
                     redisPropertyMap.put("listOrder", ListOrder.PUSH);
-                    this.cJedisList.process(null,redisPropertyMap,key,(List)value);
+                    CJedisList cJedisList = (CJedisList)this.cJedisImpls.get("list");
+                    cJedisList.process(null,redisPropertyMap,key,(List)value);
 					break;
 				case SET:
 					break;
 				case HASH:
-					this.cJedisHash.saveHashData(key,value,expireTime);
+                    CJedisHash cJedisHash = (CJedisHash) this.cJedisImpls.get("hash");
+					cJedisHash.saveHashData(key,value,expireTime);
 					break;
 				default:
 					break;

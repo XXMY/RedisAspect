@@ -4,6 +4,7 @@ import cfw.model.Descriptions;
 import cfw.model.Movies;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import test.bo.GetDescriptionsBo;
 import test.dao.MoviesDao;
 import test.utils.SpringUtil;
 
@@ -38,7 +39,8 @@ public class RedisAspectTest {
 
     @Test
     public void testGetDescriptions(){
-        List<Descriptions> descriptions = moviesDao.getDescriptions(0L,1L);
+        GetDescriptionsBo bo = new GetDescriptionsBo();
+        List<Descriptions> descriptions = moviesDao.getDescriptions(bo);
 
         System.out.println(descriptions);
     }

@@ -36,6 +36,8 @@ public class RedisCacheAspect {
 	private JedisPool jedisPool;
 
 	/**
+     * Existing problem: List type data will be mess while query 5th to 10th line
+     * record when redis only has 6 records.
 	 * @author Fangwei_Cai
 	 * @time since 2016年6月26日 下午3:12:34
 	 * @param pjp
@@ -80,7 +82,7 @@ public class RedisCacheAspect {
 	 * @return Map<br>
 	 *     Keys: key, keyType, field, start ,end
 	 */
-	public Map<String,Object> getAnnotationProperties(Method method,Object[] args) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+	private Map<String,Object> getAnnotationProperties(Method method,Object[] args) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
 		StringBuffer buffer = new StringBuffer();
 		Map<String,Object> map = new HashMap<String,Object>();
 		
@@ -97,7 +99,6 @@ public class RedisCacheAspect {
                         this.getPropertiesFromBean(buffer,fields,map,args[i]);
                     }else{
                         this.putValuesIntoMap(an,map,fields,buffer,args[i]);
-
                     }
                 }
 
@@ -114,6 +115,32 @@ public class RedisCacheAspect {
 	}
 
     /**
+     * Put annotated parameter value into map.
+     * @param annotation
+     * @param map
+     * @param fields
+     * @param buffer
+     * @param arg
+     */
+    private void putValuesIntoMap(Annotation annotation,Map<String,Object> map,List<String> fields,StringBuffer buffer,Object arg){
+        if(annotation instanceof RedisID){
+            buffer.append(":");
+            buffer.append(arg);
+        }else if(annotation instanceof RedisField){
+            fields.add(arg.toString());
+        }else if(annotation instanceof RedisStart){
+            map.put("start", arg);
+        }else if(annotation instanceof RedisEnd){
+            map.put("end", arg);
+        }else if(annotation instanceof RedisLength){
+            Long start = (Long)map.get("start");
+            Long end = start + (Long)arg;
+            map.put("end",end);
+        }
+
+    }
+
+    /**
      * @author Fangwei_Cai
      * @time since 2016-8-21 14:38:43
      * @param bean
@@ -127,7 +154,7 @@ public class RedisCacheAspect {
 		for(Field field : fields){
             Annotation [] annotations = field.getDeclaredAnnotations();
 
-			// Get value of currnet field.
+			// Get value of current field.
 			String getValueMethodName = SimpleAssign.createMethodName(field,true);
 			Method getValueMethod = clazz.getDeclaredMethod(getValueMethodName,null);
 			Object fieldValue = getValueMethod.invoke(bean);
@@ -139,20 +166,6 @@ public class RedisCacheAspect {
         }
 
 	}
-
-    private void putValuesIntoMap(Annotation annotation,Map<String,Object> map,List<String> fields,StringBuffer buffer,Object arg){
-        if(annotation instanceof RedisID){
-            buffer.append(":");
-            buffer.append(arg);
-        }else if(annotation instanceof RedisField){
-            fields.add(arg.toString());
-        }else if(annotation instanceof RedisStart){
-            map.put("start", arg);
-        }else if(annotation instanceof RedisEnd){
-            map.put("end", arg);
-        }
-
-    }
 
 	private CJedis initCJedis() throws CRedisInitializeException {
 		if(this.jedisPool != null){

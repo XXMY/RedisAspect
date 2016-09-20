@@ -16,7 +16,7 @@ public class GetDescriptionsBo {
 
     public GetDescriptionsBo(){
         this.start = 0L;
-        this.end = -2L;
+        this.end = 5L;
     }
 
     public Long getStart() {

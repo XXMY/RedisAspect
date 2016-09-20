@@ -76,7 +76,7 @@ public class MoviesDao {
             expire = 0)
     public List<Descriptions> getDescriptions(@RedisParam GetDescriptionsBo getDescriptionsBo){
         List<Descriptions> descriptions = new ArrayList<>();
-        for(int i=0;i<1;i++){
+        for(int i=0;i<20;i++){
             Descriptions description = new Descriptions();
             description.setId((long)i);
             description.setAbstract_("习近平组织中央深改组会议-" + i);

@@ -30,6 +30,8 @@ public class CJedis extends BaseJedis{
             this.initialize(jedisPool);
             this.cJedisImpls.put("hash",new CJedisHash(jedisPool));
             this.cJedisImpls.put("list",new CJedisList(jedisPool));
+			this.cJedisImpls.put("set",new CJedisSet(jedisPool));
+			this.cJedisImpls.put("storedSet",new CJedisStoredSet(jedisPool));
 		}
 	}
 
@@ -66,17 +68,19 @@ public class CJedis extends BaseJedis{
 		if(StringUtils.isNotEmpty(key)){
 			KeyType keyType = (KeyType)redisPropertyMap.get("keyType");
 			switch(keyType){
-				case STRING:
+				case String:
 					result = this.jedis.get(key);
 					break;
-				case LIST:
+				case List:
                     CJedisList cJedisList = (CJedisList)this.cJedisImpls.get("list");
 					result = cJedisList.process(method,redisPropertyMap,key,null);
 					break;
-				case SET:
+				case Set:
+					break;
+				case StoredSet:
 
 					break;
-				case HASH:
+				case Hash:
                     CJedisHash cJedisHash = (CJedisHash) this.cJedisImpls.get("hash");
 					result = cJedisHash.getValue(method,redisPropertyMap,key);
 					break;
@@ -106,18 +110,18 @@ public class CJedis extends BaseJedis{
 		try{
 			KeyType keyType = (KeyType) redisPropertyMap.get("keyType");
 			switch (keyType){
-				case STRING:
+				case String:
 					this.jedis.set((String)redisPropertyMap.get("key"), value.toString());
 					break;
-				case LIST:
+				case List:
                     redisPropertyMap.remove("listOrder");
                     redisPropertyMap.put("listOrder", ListOrder.PUSH);
                     CJedisList cJedisList = (CJedisList)this.cJedisImpls.get("list");
                     cJedisList.process(null,redisPropertyMap,key,(List)value);
 					break;
-				case SET:
+				case Set:
 					break;
-				case HASH:
+				case Hash:
                     CJedisHash cJedisHash = (CJedisHash) this.cJedisImpls.get("hash");
 					cJedisHash.saveHashData(key,value,expireTime);
 					break;

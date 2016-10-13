@@ -1,10 +1,9 @@
 package cfw.redis;
 
 import cfw.reflect.ReflectConsts;
-import cfw.reflect.SimpleAssign;
+import cfw.reflect.ReflectUtils;
 import org.apache.commons.beanutils.BeanUtilsBean;
 import org.apache.commons.lang.StringUtils;
-import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 
 import java.lang.reflect.Field;
@@ -20,7 +19,7 @@ class CJedisHash extends BaseJedis{
 
     private final static String Redis_Hash_Prefix = "REDIS_HASH_Prefix.";
 
-    public CJedisHash(JedisPool jedisPool){
+    public CJedisHash(final JedisPool jedisPool){
         if(jedisPool != null){
             this.jedis = jedisPool.getResource();
         }
@@ -77,7 +76,7 @@ class CJedisHash extends BaseJedis{
         if(result == null || StringUtils.isEmpty(key)) return false;
 
         Class clazz = result.getClass();
-        Field[] resultClassFields = SimpleAssign.getFields(null,clazz);
+        Field[] resultClassFields = ReflectUtils.getFields(null,clazz);
         try{
             for(Field resultClassField : resultClassFields){
                 Object value = resultClassField.get(result);

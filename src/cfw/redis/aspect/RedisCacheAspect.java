@@ -3,7 +3,7 @@ package cfw.redis.aspect;
 import cfw.redis.CJedis;
 import cfw.redis.annotation.*;
 import cfw.redis.exception.CRedisInitializeException;
-import cfw.reflect.SimpleAssign;
+import cfw.reflect.ReflectUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -155,7 +155,7 @@ public class RedisCacheAspect {
             Annotation [] annotations = field.getDeclaredAnnotations();
 
 			// Get value of current field.
-			String getValueMethodName = SimpleAssign.createMethodName(field,true);
+			String getValueMethodName = ReflectUtils.createMethodName(field,true);
 			Method getValueMethod = clazz.getDeclaredMethod(getValueMethodName,null);
 			Object fieldValue = getValueMethod.invoke(bean);
 

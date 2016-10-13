@@ -18,7 +18,7 @@ import java.util.List;
 @Repository
 public class MoviesDao {
 
-    @RedisCacheable(key = "movie",keyType = KeyType.HASH)
+    @RedisCacheable(key = "movie",keyType = KeyType.Hash)
     public Movies getMovieById(@RedisID Long mid){
         Movies movie = new Movies();
         movie.setId(mid);
@@ -35,7 +35,7 @@ public class MoviesDao {
         return movie;
     }
 
-    @RedisCacheable(key = "movie", keyType = KeyType.HASH)
+    @RedisCacheable(key = "movie", keyType = KeyType.Hash)
     public Movies getMovieName(@RedisID Long mid,@RedisField String field){
         Movies movie = new Movies();
         movie.setName("叶问3");
@@ -70,10 +70,10 @@ public class MoviesDao {
     }*/
 
     @RedisCacheable(key = "movie:10:descriptions",
-            keyType = KeyType.LIST,
+            keyType = KeyType.List,
             direction = Direction.LEFT,
             listOrder = ListOrder.RANGE,
-            expire = 0)
+            expire = 60)
     public List<Descriptions> getDescriptions(@RedisParam GetDescriptionsBo getDescriptionsBo){
         List<Descriptions> descriptions = new ArrayList<>();
         for(int i=0;i<20;i++){

@@ -18,7 +18,7 @@ import java.util.Map;
  */
 class CJedisList extends BaseJedis{
 
-    public CJedisList(JedisPool jedisPool){
+    public CJedisList(final JedisPool jedisPool){
         if(jedisPool != null){
             this.jedis = jedisPool.getResource();
         }
@@ -94,10 +94,9 @@ class CJedisList extends BaseJedis{
 
         if(StringUtils.isEmpty(key) || values == null || values.size() == 0) return pushResult;
 
-        Gson gson = new Gson();
         String [] valueArray = new String[values.size()];
         for(int i=0;i<values.size();i++){
-            valueArray[i] = gson.toJson(values.get(i));
+            valueArray[i] = this.gson.toJson(values.get(i));
         }
 
         if(direction == null) direction = Direction.LEFT;

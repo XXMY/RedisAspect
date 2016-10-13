@@ -3,6 +3,7 @@ package cfw.redis.annotation;
 import cfw.redis.util.Direction;
 import cfw.redis.util.KeyType;
 import cfw.redis.util.ListOrder;
+import cfw.redis.util.StoredSetOrder;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -19,11 +20,13 @@ public @interface RedisCacheable {
 	
 	String key() default "";
 	
-	KeyType keyType() default KeyType.STRING;
+	KeyType keyType() default KeyType.String;
 
 	Direction direction() default Direction.LEFT;
 
 	ListOrder listOrder() default ListOrder.RANGE;
+
+	StoredSetOrder storedSetOrder() default StoredSetOrder.ZADD;
 
 	int expire() default 0;
 	

@@ -6,9 +6,7 @@ import redis.clients.jedis.JedisPool;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 /**
  * Created by Duskrain on 2016/10/8.
@@ -29,10 +27,14 @@ public class CJedisStoredSet extends BaseJedis {
      * @param key
      * @return
      */
-    public Object process(Method method, Map<String,Object> redisPropertyMap, String key,List<?> values) throws NoSuchMethodException, NoSuchFieldException, IllegalAccessException, InvocationTargetException {
+    public Object process(Method method, Map<String,Object> redisPropertyMap, String key,List<?> values) throws Exception {
         Object result = null;
         StoredSetOrder order = (StoredSetOrder) redisPropertyMap.get("storedSetOrder");
 
+        Class genericTypeClass = null;
+        if(method != null){
+           genericTypeClass = ReflectUtils.getGenericType(method);
+        }
         switch(order){
             case ZADD:
                 result = this.zadd(redisPropertyMap,key,values);
@@ -45,7 +47,15 @@ public class CJedisStoredSet extends BaseJedis {
                 break;
             case ZINTERSTORE:
                 break;
+            case ZRANGE:
+                Long start = (Long) redisPropertyMap.get("start");
+                Long end = (Long) redisPropertyMap.get("end");
+                result = this.zrange(key,start,end,genericTypeClass);
+                break;
             case ZRANGEBYSCORE:
+                Double min = (Double) redisPropertyMap.get("min");
+                Double max = (Double) redisPropertyMap.get("max");
+                result = this.zrangeByScore(key,min,max,genericTypeClass);
                 break;
             case ZRANK:
                 break;
@@ -73,6 +83,7 @@ public class CJedisStoredSet extends BaseJedis {
     }
 
     /**
+     * Untested.
      * @author Fangwei_Cai
      * @time since 2016-10-13 17:40:08
      * @param redisPropertyMap
@@ -84,8 +95,8 @@ public class CJedisStoredSet extends BaseJedis {
      * @throws IllegalAccessException
      * @throws NoSuchFieldException
      */
-    private boolean zadd(Map<String,Object> redisPropertyMap, String key,List<?> values) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException, NoSuchFieldException {
-        if(values.size() <= 0) return false;
+    private Long zadd(Map<String,Object> redisPropertyMap, String key,List<?> values) throws Exception {
+        if(values.size() <= 0) return 0L;
         Class clazz = values.get(0).getClass();
         // get record's id as score and store the value.
         Map<Double,String> map = new TreeMap<Double,String>();
@@ -95,7 +106,64 @@ public class CJedisStoredSet extends BaseJedis {
             map.put(id,valueString);
         }
 
-        this.jedis.zadd(key,map);
-        return false;
+        return this.jedis.zadd(key,map);
     }
+
+    /**
+     * @author Fangwei_Cai
+     * @time since 2016-10-14 17:40:19
+     * @param key
+     * @param T
+     * @param <T>
+     * @return
+     */
+    private <T> List<T> zrangeByScore(String key,double min,double max, Class<T> T){
+        List<T> returnResult = null;
+        Set<String> jedisResults = new TreeSet<String>();
+        try{
+            jedisResults = this.jedis.zrangeByScore(key,min,max);
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+
+        if(jedisResults == null || jedisResults.size() == 0) return returnResult;
+
+        returnResult = new ArrayList<T>();
+        for(String jedisResult : jedisResults){
+            T t = this.gson.fromJson(jedisResult,T);
+            returnResult.add(t);
+        }
+
+        return returnResult;
+    }
+
+    /**
+     * @author Fangwei_Cai
+     * @time since 2016-10-14 17:43:49
+     * @param key
+     * @param start
+     * @param end
+     * @param T
+     * @param <T>
+     * @return
+     */
+    private <T> List<T> zrange(String key,Long start, Long end, Class<T> T){
+        List<T> returnResult = null;
+        Set<String> jedisResults = new TreeSet<String>();
+        try{
+            jedisResults = this.jedis.zrange(key,start,end);
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+
+        if(jedisResults == null || jedisResults.size() == 0) return returnResult;
+
+        returnResult = new ArrayList<T>();
+        for(String jedisResult : jedisResults){
+            T t = this.gson.fromJson(jedisResult,T);
+            returnResult.add(t);
+        }
+        return returnResult;
+    }
+
 }

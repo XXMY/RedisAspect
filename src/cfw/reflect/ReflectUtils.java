@@ -12,10 +12,8 @@ import java.util.Map;
 public class ReflectUtils {
 
     /**
-     * Get generic type of specific method's return type in string.
-     * <p>
+     * Get generic type of specified method's return type in string.<br/>
      * If the return type of method is not generic, null will be returned.
-     * </p>
      * @author Fangwei_Cai
      * @create 2016-7-23 15:56:32
      * @param method
@@ -31,6 +29,39 @@ public class ReflectUtils {
         }
 
         return genericTypeName;
+    }
+
+    /**
+     * Get class from specified class type name.<br/>
+     * If the class specified not exists, null will be returned.
+     * @author Fangwei_Cai
+     * @time since 2016-10-14 18:33:42
+     * @param className
+     * @return
+     */
+    public static Class getGenericType(String className){
+        try {
+            Class genericTypeClass = Class.forName(className);
+            return genericTypeClass;
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    /**
+     * Get generic type of specified method's return type.<br/>
+     * If the return type of method is not generic, null will be returned.
+     * @author Fangwei_Cai
+     * @time since 2016-10-14 18:27:39
+     * @param method
+     * @return
+     */
+    public static Class getGenericType(Method method){
+        String genericTypeName = ReflectUtils.getGenericTypeName(method);
+
+        return ReflectUtils.getGenericType(genericTypeName);
     }
 
     /**

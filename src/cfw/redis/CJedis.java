@@ -7,6 +7,7 @@ import org.apache.commons.lang.StringUtils;
 
 import redis.clients.jedis.JedisPool;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
@@ -59,7 +60,7 @@ public class CJedis extends BaseJedis{
 	 * @param redisPropertyMap
 	 * @return
 	 */
-	public Object getRedisValue(Method method, Map<String,Object> redisPropertyMap){
+	public Object getRedisValue(Method method, Map<String,Object> redisPropertyMap) throws Exception {
 
 		String key = (String)redisPropertyMap.get("key");
 
@@ -78,7 +79,8 @@ public class CJedis extends BaseJedis{
 				case Set:
 					break;
 				case StoredSet:
-
+					CJedisStoredSet cJedisStoredSet = (CJedisStoredSet) this.cJedisImpls.get("storedSet");
+					result = cJedisStoredSet.process(method,redisPropertyMap,key,null);
 					break;
 				case Hash:
                     CJedisHash cJedisHash = (CJedisHash) this.cJedisImpls.get("hash");

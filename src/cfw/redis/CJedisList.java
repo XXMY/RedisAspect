@@ -41,12 +41,7 @@ class CJedisList extends BaseJedis{
 
         Class genericTypeClass = null;
         if(method != null){
-            String genericTypeName = ReflectUtils.getGenericTypeName(method);
-            try {
-                genericTypeClass = Class.forName(genericTypeName);
-            } catch (ClassNotFoundException e) {
-                e.printStackTrace();
-            }
+           genericTypeClass = ReflectUtils.getGenericType(method);
         }
 
         switch(order){
@@ -118,28 +113,26 @@ class CJedisList extends BaseJedis{
      * @param key
      * @param start
      * @param end
-     * @param classofT
+     * @param T
      * @param <T>
      * @return
      */
-    private <T> List<T> range(String key,Long start, Long end,Class<T> classofT){
+    private <T> List<T> range(String key,Long start, Long end,Class<T> T){
 
         List<T> returnResult = null;
 
-        List<String> jedisResult;
+        List<String> jedisResult = new ArrayList<String>();
         try {
              jedisResult = this.jedis.lrange(key,start,end);
         } catch (Exception e) {
             e.printStackTrace();
-            return null;
         }
 
         if(jedisResult == null || jedisResult.size() == 0) return returnResult;
 
-        Gson gson = new Gson();
         returnResult = new ArrayList<>();
         for(String resultString : jedisResult){
-            T resultObject = gson.fromJson(resultString,classofT);
+            T resultObject = this.gson.fromJson(resultString,T);
             returnResult.add(resultObject);
         }
 

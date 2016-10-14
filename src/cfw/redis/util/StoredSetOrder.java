@@ -8,6 +8,7 @@ public enum StoredSetOrder {
     ZCARD,
     ZCOUNT,
     ZINCRBY,
+    ZRANGE,
     ZRANGEBYSCORE,
     ZRANK,
     ZREM,

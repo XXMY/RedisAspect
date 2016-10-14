@@ -6,6 +6,7 @@ import cfw.redis.annotation.*;
 import cfw.redis.util.Direction;
 import cfw.redis.util.KeyType;
 import cfw.redis.util.ListOrder;
+import cfw.redis.util.StoredSetOrder;
 import org.springframework.stereotype.Repository;
 import test.bo.GetDescriptionsBo;
 
@@ -49,12 +50,31 @@ public class MoviesDao {
         return "YE WEN";
     }
 
-/*    @RedisCacheable(key = "movie:10:descriptions",
-            keyType = KeyType.LIST,
+   @RedisCacheable(key = "movie:10:descriptions",
+            keyType = KeyType.List,
             direction = Direction.LEFT,
             listOrder = ListOrder.RANGE,
             expire = 0)
     public List<Descriptions> getDescriptions(@RedisStart Long start, @RedisEnd Long end){
+        return this.createTestDescription();
+    }
+
+    @RedisCacheable(key = "movie:10:descriptions",
+            keyType = KeyType.StoredSet,
+            direction = Direction.LEFT,
+            storedSetOrder = StoredSetOrder.ZRANGE,
+            expire = 100)
+    public List<Descriptions> getDescriptions(@RedisParam GetDescriptionsBo getDescriptionsBo){
+        return this.createTestDescription();
+    }
+
+
+    /**
+     * @author Fangwei_Cai
+     * @time since 2016-10-14 17:29:20
+     * @return
+     */
+    private List<Descriptions> createTestDescription(){
         List<Descriptions> descriptions = new ArrayList<>();
         for(int i=0;i<1;i++){
             Descriptions description = new Descriptions();
@@ -62,30 +82,10 @@ public class MoviesDao {
             description.setAbstract_("习近平组织中央深改组会议-" + i);
             description.setDescription("习近平主持召开中央全面深化改革领导小组第二十六次会议-" + i);
             description.setIsdeleted(true);
-
-            descriptions.add(description);
-        }
-
-        return descriptions;
-    }*/
-
-    @RedisCacheable(key = "movie:10:descriptions",
-            keyType = KeyType.List,
-            direction = Direction.LEFT,
-            listOrder = ListOrder.RANGE,
-            expire = 60)
-    public List<Descriptions> getDescriptions(@RedisParam GetDescriptionsBo getDescriptionsBo){
-        List<Descriptions> descriptions = new ArrayList<>();
-        for(int i=0;i<20;i++){
-            Descriptions description = new Descriptions();
-            description.setId((long)i);
-            description.setAbstract_("习近平组织中央深改组会议-" + i);
-            description.setDescription("习近平主持召开中央全面深化改革领导小组第二十六次会议-" + i);
-            description.setIsdeleted(true);
-
             descriptions.add(description);
         }
 
         return descriptions;
     }
+
 }

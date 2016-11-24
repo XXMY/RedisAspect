@@ -4,6 +4,7 @@ import cfw.reflect.ReflectConsts;
 import cfw.reflect.ReflectUtils;
 import org.apache.commons.beanutils.BeanUtilsBean;
 import org.apache.commons.lang.StringUtils;
+import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 
 import java.lang.reflect.Field;
@@ -19,9 +20,9 @@ class CJedisHash extends BaseJedis{
 
     private final static String Redis_Hash_Prefix = "REDIS_HASH_Prefix.";
 
-    public CJedisHash(final JedisPool jedisPool){
-        if(jedisPool != null){
-            this.jedis = jedisPool.getResource();
+    public CJedisHash(final Jedis jedis){
+        if(jedis != null){
+            this.jedis = jedis;
         }
     }
 

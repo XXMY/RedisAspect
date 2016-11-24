@@ -5,6 +5,7 @@ import cfw.redis.util.ListOrder;
 import cfw.reflect.ReflectUtils;
 import com.google.gson.Gson;
 import org.springframework.util.StringUtils;
+import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 
 import java.lang.reflect.Method;
@@ -17,9 +18,9 @@ import java.util.Map;
  */
 class CJedisSet extends BaseJedis{
 
-    public CJedisSet(final JedisPool jedisPool){
-        if(jedisPool != null){
-            this.jedis = jedisPool.getResource();
+    public CJedisSet(final Jedis jedis){
+        if(jedis != null){
+            this.jedis = jedis;
         }
     }
 

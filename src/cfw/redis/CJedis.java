@@ -5,8 +5,10 @@ import cfw.redis.util.KeyType;
 import cfw.redis.util.ListOrder;
 import org.apache.commons.lang.StringUtils;
 
+import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 
+import javax.annotation.Resource;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
@@ -21,37 +23,16 @@ import java.util.Set;
  * @author Fangwei_Cai
  * @time since 2016年6月23日 下午6:15:39
  */
-public class CJedis extends BaseJedis{
+public class CJedis {
 
-    private Map<String,BaseJedis> cJedisImpls = new HashMap<>();
+	private JedisPool jedisPool;
 
 	public CJedis(JedisPool jedisPool) throws CRedisInitializeException {
-		super();
 		if(jedisPool != null){
-            this.initialize(jedisPool);
-            this.cJedisImpls.put("hash",new CJedisHash(jedisPool));
-            this.cJedisImpls.put("list",new CJedisList(jedisPool));
-			this.cJedisImpls.put("set",new CJedisSet(jedisPool));
-			this.cJedisImpls.put("storedSet",new CJedisStoredSet(jedisPool));
+            this.jedisPool = jedisPool;
 		}
 	}
 
-    /**
-     * Empty CJedis, set jedis to null.
-     * @author Fangwei_Cai
-     * @time since 2016-8-14 08:55:11
-     * @return
-     */
-    public boolean close(JedisPool jedisPool){
-        if(jedisPool != null){
-            this.release(jedisPool);
-        }
-        Set<String> keys = this.cJedisImpls.keySet();
-        for(String key : keys){
-            this.cJedisImpls.get(key).release(jedisPool);
-        }
-        return true;
-    }
 
 	/**
 	 * @author Fangwei_Cai
@@ -65,31 +46,33 @@ public class CJedis extends BaseJedis{
 		String key = (String)redisPropertyMap.get("key");
 
 		Object result = null;
-
+		Jedis jedis = this.jedisPool.getResource();
 		if(StringUtils.isNotEmpty(key)){
 			KeyType keyType = (KeyType)redisPropertyMap.get("keyType");
 			switch(keyType){
 				case String:
-					result = this.jedis.get(key);
+					result = jedis.get(key);
 					break;
 				case List:
-                    CJedisList cJedisList = (CJedisList)this.cJedisImpls.get("list");
+                    CJedisList cJedisList = new CJedisList(jedis);
 					result = cJedisList.process(method,redisPropertyMap,key,null);
 					break;
 				case Set:
 					break;
 				case StoredSet:
-					CJedisStoredSet cJedisStoredSet = (CJedisStoredSet) this.cJedisImpls.get("storedSet");
+					CJedisStoredSet cJedisStoredSet = new CJedisStoredSet(jedis);
 					result = cJedisStoredSet.process(method,redisPropertyMap,key,null);
 					break;
 				case Hash:
-                    CJedisHash cJedisHash = (CJedisHash) this.cJedisImpls.get("hash");
+                    CJedisHash cJedisHash = new CJedisHash(jedis);
 					result = cJedisHash.getValue(method,redisPropertyMap,key);
 					break;
 				default:
 					break;
 			}
 		}
+
+		this.jedisPool.returnResource(jedis);
 
 		if(result == null) return null;
 
@@ -111,32 +94,37 @@ public class CJedis extends BaseJedis{
 
 		try{
 			KeyType keyType = (KeyType) redisPropertyMap.get("keyType");
+			Jedis jedis = this.jedisPool.getResource();
 			switch (keyType){
 				case String:
-					this.jedis.set((String)redisPropertyMap.get("key"), value.toString());
+					jedis.set((String)redisPropertyMap.get("key"), value.toString());
 					break;
 				case List:
                     redisPropertyMap.remove("listOrder");
                     redisPropertyMap.put("listOrder", ListOrder.PUSH);
-                    CJedisList cJedisList = (CJedisList)this.cJedisImpls.get("list");
+                    CJedisList cJedisList = new CJedisList(jedis);
                     cJedisList.process(null,redisPropertyMap,key,(List)value);
 					break;
 				case Set:
 					break;
 				case Hash:
-                    CJedisHash cJedisHash = (CJedisHash) this.cJedisImpls.get("hash");
+                    CJedisHash cJedisHash = new CJedisHash(jedis);
 					cJedisHash.saveHashData(key,value,expireTime);
 					break;
 				default:
 					break;
 			}
+
+			// Set keys expire time.
+			if(expireTime > 0) jedis.expire(key,expireTime);
+
+			this.jedisPool.returnResource(jedis);
 		}catch(Exception e){
 			e.printStackTrace();
 			return false;
 		}
 
-		// Set keys expire time.
-		if(expireTime > 0) this.jedis.expire(key,expireTime);
+
 
 		return true;
 	}

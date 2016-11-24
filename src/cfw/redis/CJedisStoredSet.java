@@ -2,6 +2,7 @@ package cfw.redis;
 
 import cfw.redis.util.StoredSetOrder;
 import cfw.reflect.ReflectUtils;
+import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 
 import java.lang.reflect.InvocationTargetException;
@@ -11,11 +12,11 @@ import java.util.*;
 /**
  * Created by Duskrain on 2016/10/8.
  */
-public class CJedisStoredSet extends BaseJedis {
+class CJedisStoredSet extends BaseJedis {
 
-    public CJedisStoredSet(final JedisPool jedisPool){
-        if(jedisPool != null){
-            this.jedis = jedisPool.getResource();
+    public CJedisStoredSet(final Jedis jedis){
+        if(jedis != null){
+            this.jedis = jedis;
         }
     }
 

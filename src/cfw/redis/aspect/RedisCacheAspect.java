@@ -2,14 +2,12 @@ package cfw.redis.aspect;
 
 import cfw.redis.CJedis;
 import cfw.redis.annotation.*;
-import cfw.redis.exception.CRedisInitializeException;
 import cfw.reflect.ReflectUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.stereotype.Component;
-import redis.clients.jedis.JedisPool;
 
 import javax.annotation.Resource;
 import java.lang.annotation.Annotation;
@@ -29,11 +27,10 @@ import java.util.Map;
 @Component
 public class RedisCacheAspect {
 
-
 	private final String cache = "@annotation(cfw.redis.annotation.RedisCacheable)";
 
-	@Resource(name = "jedisPool")
-	private JedisPool jedisPool;
+	@Resource(name = "cJedis")
+	private CJedis cJedis;
 
 	/**
      * Existing problem: List type data will be mess while query 5th to 10th line
@@ -46,7 +43,7 @@ public class RedisCacheAspect {
 	 */
 	@Around(value = cache)
 	public Object process(ProceedingJoinPoint pjp) throws Throwable{
-		CJedis cJedis = this.initCJedis();
+
 		try{
 			Method method = ((MethodSignature) pjp.getSignature()).getMethod();
 			Object [] args = pjp.getArgs();
@@ -66,8 +63,6 @@ public class RedisCacheAspect {
 			return value;
 		}catch(Exception e){
 			e.printStackTrace();
-		}finally{
-			this.releaseCJedis(cJedis);
 		}
 
 		return null;
@@ -167,20 +162,6 @@ public class RedisCacheAspect {
 
 	}
 
-	private CJedis initCJedis() throws CRedisInitializeException {
-		if(this.jedisPool != null){
-			CJedis cJedis = new CJedis(this.jedisPool);
 
-			return cJedis;
-		}
-
-		return null;
-	}
-
-	private void releaseCJedis(CJedis cJedis){
-		if(cJedis != null){
-			cJedis.close(this.jedisPool);
-		}
-	}
 	
 }

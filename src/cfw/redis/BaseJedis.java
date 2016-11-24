@@ -14,22 +14,4 @@ public abstract class BaseJedis {
 
     protected Gson gson = new Gson();
 
-    protected boolean initialize(final JedisPool jedisPool) throws CRedisInitializeException {
-        if(jedisPool == null){
-            throw new CRedisInitializeException("jedisPool is null");
-        }
-        this.jedis = jedisPool.getResource();
-
-        return true;
-    }
-
-    protected boolean release(final JedisPool jedisPool){
-        if(this.jedis != null && jedisPool != null){
-            jedisPool.returnResource(this.jedis);
-        }
-
-        this.jedis = null;
-        return true;
-    }
-
 }

@@ -18,11 +18,12 @@ import java.util.Map;
  */
 class CJedisList extends BaseJedis{
 
-    public CJedisList(final JedisPool jedisPool){
-        if(jedisPool != null){
-            this.jedis = jedisPool.getResource();
+    public CJedisList(final Jedis jedis){
+        if(jedis != null){
+            this.jedis = jedis;
         }
     }
+
 
     /**
      * @author Fnagwei_Cai

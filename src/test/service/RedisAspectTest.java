@@ -40,7 +40,7 @@ public class RedisAspectTest {
     @Test
     public void testGetDescriptions(){
         GetDescriptionsBo bo = new GetDescriptionsBo();
-        List<Descriptions> descriptions = moviesDao.getDescriptions(bo);
+        List<Descriptions> descriptions = moviesDao.getDescriptions(0L,5L);
 
         System.out.println(descriptions);
     }

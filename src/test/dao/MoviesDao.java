@@ -1,7 +1,7 @@
 package test.dao;
 
-import cfw.model.Descriptions;
-import cfw.model.Movies;
+import test.model.Descriptions;
+import test.model.Movies;
 import cfw.redis.annotation.*;
 import cfw.redis.util.Direction;
 import cfw.redis.util.KeyType;
@@ -79,7 +79,7 @@ public class MoviesDao {
         for(int i=0;i<1;i++){
             Descriptions description = new Descriptions();
             description.setId((long)i);
-            description.setAbstract_("习近平组织中央深改组会议-" + i);
+            description.setAbstract_("123习近平组织中央深改组会议-" + i);
             description.setDescription("习近平主持召开中央全面深化改革领导小组第二十六次会议-" + i);
             description.setIsdeleted(true);
             descriptions.add(description);

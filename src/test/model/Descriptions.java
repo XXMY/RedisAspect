@@ -1,4 +1,4 @@
-package cfw.model;
+package test.model;
 
 
 /**

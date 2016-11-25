@@ -1,7 +1,7 @@
 package test.service;
 
-import cfw.model.Descriptions;
-import cfw.model.Movies;
+import test.model.Descriptions;
+import test.model.Movies;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import test.bo.GetDescriptionsBo;
@@ -40,7 +40,8 @@ public class RedisAspectTest {
     @Test
     public void testGetDescriptions(){
         GetDescriptionsBo bo = new GetDescriptionsBo();
-        List<Descriptions> descriptions = moviesDao.getDescriptions(0L,5L);
+        bo.setStart(0L);
+        List<Descriptions> descriptions = moviesDao.getDescriptions(bo);
 
         System.out.println(descriptions);
     }

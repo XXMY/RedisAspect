@@ -1,4 +1,4 @@
-package cfw.model;
+package test.model;
 
 import java.util.Date;
 

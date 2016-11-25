@@ -3,6 +3,7 @@ package cfw.redis;
 import cfw.redis.exception.CRedisInitializeException;
 import cfw.redis.util.KeyType;
 import cfw.redis.util.ListOrder;
+import cfw.redis.util.StoredSetOrder;
 import org.apache.commons.lang.StringUtils;
 
 import redis.clients.jedis.Jedis;
@@ -106,6 +107,11 @@ public class CJedis {
                     cJedisList.process(null,redisPropertyMap,key,(List)value);
 					break;
 				case Set:
+					break;
+				case StoredSet:
+					redisPropertyMap.put("storedSetOrder", StoredSetOrder.ZADD);
+					CJedisStoredSet cJedisStoredSet = new CJedisStoredSet(jedis);
+					cJedisStoredSet.process(null,redisPropertyMap,key,(List)value);
 					break;
 				case Hash:
                     CJedisHash cJedisHash = new CJedisHash(jedis);

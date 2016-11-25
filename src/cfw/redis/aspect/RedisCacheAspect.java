@@ -99,11 +99,16 @@ public class RedisCacheAspect {
 
 			}
 			if(fields.size()>0) map.put("fields",fields.toArray(new String[]{}));
-			map.put("key", buffer.toString());
+            // Use reflect to invoke method of RedisCacheable and put the value into map.
+            ReflectUtils.putMethodResultIntoMap(redisCacheable,map);
+            map.put("key", buffer.toString());
+			/*
 			map.put("keyType", redisCacheable.keyType());
-			map.put("direction",redisCacheable.direction());
+            map.put("direction",redisCacheable.direction());
 			map.put("listOrder",redisCacheable.listOrder());
+            map.put("storedSetOrder",redisCacheable.storedSetOrder());
 			map.put("expire",redisCacheable.expire());
+            */
 		}
 		
 		return map;

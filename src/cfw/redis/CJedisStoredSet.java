@@ -28,6 +28,7 @@ class CJedisStoredSet extends BaseJedis {
      * @param key
      * @return
      */
+    @Override
     public Object process(Method method, Map<String,Object> redisPropertyMap, String key,List<?> values) throws Exception {
         Object result = null;
         StoredSetOrder order = (StoredSetOrder) redisPropertyMap.get("storedSetOrder");
@@ -84,7 +85,8 @@ class CJedisStoredSet extends BaseJedis {
     }
 
     /**
-     * Untested.
+     * This method use value's id as storedSet's score which can make data in order.<br/>
+     * So id property is necessary.
      * @author Fangwei_Cai
      * @time since 2016-10-13 17:40:08
      * @param redisPropertyMap
@@ -102,9 +104,9 @@ class CJedisStoredSet extends BaseJedis {
         // get record's id as score and store the value.
         Map<Double,String> map = new TreeMap<Double,String>();
         for(Object value : values){
-            Double id = (Double) ReflectUtils.getSpecifiedPropertyValue(value,"id");
+            String id = "" + ReflectUtils.getSpecifiedPropertyValue(value,"id");
             String valueString = this.gson.toJson(value);
-            map.put(id,valueString);
+            map.put(Double.parseDouble(id),valueString);
         }
 
         return this.jedis.zadd(key,map);

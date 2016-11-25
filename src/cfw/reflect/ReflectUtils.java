@@ -237,12 +237,33 @@ public class ReflectUtils {
      */
     public static Object getSpecifiedPropertyValue(Object object,String propertyName) throws NoSuchFieldException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         Class clazz = object.getClass();
-        Field field = clazz.getField("id");
+        Field field = clazz.getDeclaredField(propertyName);
         field.setAccessible(true);
         String methodName = ReflectUtils.createMethodName(field,true);
-        Method method = clazz.getDeclaredMethod(methodName,field.getType());
+        Method method = clazz.getDeclaredMethod(methodName);
         return method.invoke(object);
 
+    }
+
+    /**
+     * Invoke all declared method of object and put the value into resultMap.<br/>
+     * ResultMap use method's name as key.
+     * @author CaiFangwei
+     * @time since 2016-11-25 09:34:50
+     * @param object
+     * @param resultMap
+     * @throws InvocationTargetException
+     * @throws IllegalAccessException
+     */
+    public static void putMethodResultIntoMap(Object object,Map<String,Object> resultMap) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
+        Class clazz = object.getClass();
+        Method [] declaredMethods = clazz.getDeclaredMethods();
+        for(Method declaredMethod : declaredMethods){
+            Class<?> [] parameterTypes = declaredMethod.getParameterTypes();
+            if(parameterTypes.length > 0) continue;
+            Method method = clazz.getDeclaredMethod(declaredMethod.getName(),parameterTypes);
+            resultMap.put(method.getName(),method.invoke(object));
+        }
     }
 
 }

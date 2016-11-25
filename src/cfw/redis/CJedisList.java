@@ -16,7 +16,7 @@ import java.util.Map;
 /**
  * Created by Cfw on 2016/7/23.
  */
-class CJedisList extends BaseJedis{
+class CJedisList extends BaseJedis {
 
     public CJedisList(final Jedis jedis){
         if(jedis != null){
@@ -33,7 +33,8 @@ class CJedisList extends BaseJedis{
      * @param key
      * @return
      */
-    public Object process(Method method, Map<String,Object> redisPropertyMap,String key,List<?> values){
+    @Override
+    public Object process(Method method, Map<String,Object> redisPropertyMap,String key,List<?> values) {
         Object result = null;
         ListOrder order = (ListOrder) redisPropertyMap.get("listOrder");
         Direction direction = (Direction) redisPropertyMap.get("direction");
